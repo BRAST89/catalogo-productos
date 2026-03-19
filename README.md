@@ -229,13 +229,16 @@ Para que el servicio soporte alta concurrencia (1 millón de usuarios diarios), 
 
 ---
 
-## Pruebas Automatizadas (Ejemplo)
 
-Se incluye una prueba mínima para verificar que la API de listado de productos funciona correctamente.
+Pruebas Automatizadas
 
-Archivo: `tests/Feature/ProductTest.php`
+Se incluye una prueba mínima para verificar que el endpoint GET /products funciona correctamente y devuelve únicamente los productos activos.
 
-```php
+Archivo de prueba
+
+tests/Feature/ProductTest.php
+
+Código de la prueba
 <?php
 
 namespace Tests\Feature;
@@ -248,12 +251,46 @@ class ProductTest extends TestCase
     /** @test */
     public function it_can_list_active_products()
     {
-        Product::factory()->create(['estado' => true]);
-        Product::factory()->create(['estado' => false]);
+        // Creamos productos de prueba
+        Product::factory()->create(['estado' => true]); 
+        Product::factory()->create(['estado' => false]); 
 
+        // Hacemos la petición GET al endpoint /products
         $response = $this->get('/products');
 
+        // Verificamos que la respuesta sea 200 OK
         $response->assertStatus(200);
-        $response->assertJsonCount(1); // Solo debe devolver el producto activo
+
+        // Verificamos que solo se devuelva 1 producto (activo)
+        $response->assertJsonCount(1);
     }
 }
+Qué verifica la prueba
+
+Inserta dos productos de prueba:
+
+Uno activo (estado = true)
+
+Uno inactivo (estado = false)
+
+Realiza una petición GET /products.
+
+Verifica que la respuesta:
+
+Devuelva código HTTP 200.
+
+Contenga únicamente el producto activo (assertJsonCount(1)).
+
+Esta prueba asegura que el endpoint cumple correctamente su función de listar solo productos activos.
+
+Cómo ejecutar la prueba
+
+Desde la raíz del proyecto Laravel:
+
+php artisan test
+
+Laravel ejecutará la prueba y mostrará los resultados.
+
+Una salida exitosa será similar a:
+
+1 tests, 1 assertions, 0 failures
