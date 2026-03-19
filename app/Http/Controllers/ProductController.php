@@ -14,6 +14,7 @@ class ProductController extends Controller
         return response()->json($products, 200);
     }
 
+    
     // Crear un nuevo producto
     public function store(Request $request)
     {

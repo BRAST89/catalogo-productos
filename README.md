@@ -211,4 +211,49 @@ url: obligatorio, URL válida
 
 categoria: obligatorio, máximo 100 caracteres
 
-estado: obligatorio, booleano (true/false
+estado: obligatorio, booleano (true/false)
+
+---
+
+## Escalabilidad y Consideraciones para 1 Millón de Usuarios Diarios
+
+Para que el servicio soporte alta concurrencia (1 millón de usuarios diarios), se podrían implementar los siguientes cambios:
+
+- **Base de datos**: migrar a un clúster o utilizar réplicas para balanceo de lectura/escritura y mejorar disponibilidad.
+- **Caching**: usar Redis o Memcached para consultas frecuentes, por ejemplo, la lista de productos activos.
+- **API**: implementar paginación, filtrado y limitar los campos devueltos para reducir carga de la red y tiempo de respuesta.
+- **Servidor**: balanceo de carga con múltiples instancias del backend, por ejemplo usando Nginx o HAProxy.
+- **Colas/Jobs**: operaciones pesadas o asincrónicas (notificaciones, reportes) se procesan en colas para no bloquear la API.
+- **Docker/Kubernetes**: contenerización para despliegues consistentes y escalado automático.
+- **Optimización de queries**: índices en campos frecuentemente filtrados (como `estado`) y consultas optimizadas.
+
+---
+
+## Pruebas Automatizadas (Ejemplo)
+
+Se incluye una prueba mínima para verificar que la API de listado de productos funciona correctamente.
+
+Archivo: `tests/Feature/ProductTest.php`
+
+```php
+<?php
+
+namespace Tests\Feature;
+
+use Tests\TestCase;
+use App\Models\Product;
+
+class ProductTest extends TestCase
+{
+    /** @test */
+    public function it_can_list_active_products()
+    {
+        Product::factory()->create(['estado' => true]);
+        Product::factory()->create(['estado' => false]);
+
+        $response = $this->get('/products');
+
+        $response->assertStatus(200);
+        $response->assertJsonCount(1); // Solo debe devolver el producto activo
+    }
+}
