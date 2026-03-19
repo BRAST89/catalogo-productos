@@ -229,6 +229,19 @@ Para que el servicio soporte alta concurrencia (1 millón de usuarios diarios), 
 
 ---
 
+## Validaciones de Entradas
+
+La API valida los campos antes de crear o actualizar un producto:
+
+- nombre: obligatorio, máximo 255 caracteres
+- descripcion: obligatorio
+- precio: obligatorio, numérico
+- url: obligatorio, URL válida
+- categoria: obligatorio, máximo 100 caracteres
+- estado: obligatorio, booleano (true/false)
+
+Si algún campo no cumple, Laravel devuelve un error HTTP 422 con el detalle del fallo.
+
 
 Pruebas Automatizadas
 
@@ -265,6 +278,9 @@ class ProductTest extends TestCase
         $response->assertJsonCount(1);
     }
 }
+
+
+
 Qué verifica la prueba
 
 Inserta dos productos de prueba:
@@ -294,3 +310,36 @@ Laravel ejecutará la prueba y mostrará los resultados.
 Una salida exitosa será similar a:
 
 1 tests, 1 assertions, 0 failures
+
+
+## arquitectura por capas
+
+Arquitectura por Capas (Opcional / Escalabilidad)
+
+Actualmente, el proyecto sigue una estructura básica:
+
+Controller al Model a la Base de Datos
+
+Controller: recibe las peticiones HTTP y las envía al modelo.
+
+Model: representa la tabla products y se comunica con la base de datos.
+
+Para un proyecto más grande o con más usuarios, se podría separar en capas:
+
+Controller → Service → Repository → Model → Base de Datos
+
+Controller: gestiona la petición y la respuesta HTTP.
+
+Service: contiene la lógica de negocio (reglas de validación avanzadas, cálculos, procesamiento de datos).
+
+Repository: se encarga únicamente de las consultas a la base de datos, aisla la capa de persistencia.
+
+Model: representa la estructura de la tabla y relaciones de Eloquent.
+
+Beneficios de esta separación:
+
+Código más limpio y fácil de mantener.
+
+Permite escalar el proyecto sin mezclar lógica de negocio con consultas a la base de datos.
+
+Facilita pruebas unitarias y automatizadas de cada capa por separado.
